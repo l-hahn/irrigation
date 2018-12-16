@@ -12,7 +12,7 @@ def dayseconds():
 	return Now.tm_hour*60*60 + Now.tm_min*60 + Now.tm_sec
 def file_name(Prefix=""):
 	Start = time.localtime()
-	return Prefix+"airdata_{}-{}-{}--{}-{}.dat".format(Start.tm_year,Start.tm_mon,Start.tm_mday,Start.tm_hour,Start.tm_min)
+	return Prefix+"airdata_{}-{}-{}.dat".format(Start.tm_year,Start.tm_mon,Start.tm_mday)
 
 
 Parser = argparse.ArgumentParser(description="DataCollection of the bme280 Sensor from adafruit. Tmeperature, Humidity, Pressure and more is shown and stored at the same time")
@@ -29,6 +29,7 @@ Head = "DailySecond\tHumidity\tTemperature\tPressure\tAltitude\tSeaLevelPressure
 Units = "#[s]\t[%]\t[°C]\t[hPa]\t[m]"
 Prefix = ""
 Time = 0
+TimeLast = 0
 
 if Args.prefix:
 	Prefix = Args.prefix
@@ -45,12 +46,14 @@ print("#Starting on {}".format(time.ctime()))
 print(Head)
 print(Units)
 
-while Time < 86000:
-	Time = dayseconds()
+Time = dayseconds()
+while TimeLast <= Time:
 	Data = repr(Time) + "\t" + get_i2c_data(bme280)
 	File.write("{}\n".format(Data))
 	print(Data)
 	#print and write everything; AFTERWARDS reset; sothat nothing interrupts the tally function call at loop start
 	time.sleep(0.7)
+	TimeLast = Time
+	Time = dayseconds()
 
 print("END")

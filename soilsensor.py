@@ -9,7 +9,7 @@ def dayseconds():
 def file_name(Prefix=""):
 	Start = time.localtime()
 	print(Prefix)
-	return Prefix+"soildata-py_{}-{}-{}--{}-{}.dat".format(Start.tm_year,Start.tm_mon,Start.tm_mday,Start.tm_hour,Start.tm_min)
+	return Prefix+"soildata-py_{}-{}-{}.dat".format(Start.tm_year,Start.tm_mon,Start.tm_mday)
 
 
 Parser = argparse.ArgumentParser(description="DataCollection of the bme280 Sensor from adafruit. Tmeperature, Humidity, Pressure and more is shown and stored at the same time.")
@@ -28,6 +28,7 @@ PulseMS = 10
 PulseDelay = 20
 PinMask = 0
 Time = 0
+TimeLast = 0
 if Args.prefix:
 	Prefix = Args.prefix
 	if Prefix[-1] != "/":
@@ -61,7 +62,8 @@ print(Units)
 for Call in CallBacks:
 	Call.reset_tally()
 time.sleep(0.1*PulseMS)
-while Time < 86000:
+Time = dayseconds()
+while TimeLast <= Time:
 	Time = dayseconds()
 	Data = repr(Time) + "\t" + "\t".join(str(Call.tally()) for Call in CallBacks)
 	File.write("{}\n".format(Data))
@@ -70,6 +72,8 @@ while Time < 86000:
 	for Call in CallBacks:
 		Call.reset_tally()
 	time.sleep(0.1*PulseMS)
+	TimeLast = Time
+	Time = dayseconds()
 	
 PI.wave_delete(WaveID)
 PI.stop()
