@@ -1,5 +1,5 @@
 library(gplots)
-setwd("/home/pi/Desktop/SoilAirSensors/data/")
+setwd("./data/")
 
 FlankLength = 30
 Steps = 30
@@ -10,7 +10,7 @@ CorCols = colorRampPalette(c('blue','grey','green'))(n=Steps)
 CorBreaks = seq(from=MinS,to=MaxS,length.out=(Steps+1))
 Date = paste(format(Sys.Date()-1,c("%Y","%m","%d")),collapse="-")
 Data = read.table(paste("filter/soilair_",Date,".dat",sep=""),head=T)
-pdf(file=paste("pdf/soilair_",Date,"-",Date,".pdf",sep=""))
+pdf(file=paste("pdf/soilair_",Date,".pdf",sep=""))
 
 MeanData = data.frame(
   DailySecond = Data$DailySecond,
