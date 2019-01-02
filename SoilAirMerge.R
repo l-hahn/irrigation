@@ -1,5 +1,5 @@
 setwd("/home/pi/Desktop/SoilAirSensors/data/")
-Date = format(Sys.Date()-1,c("%Y","%m","%d"))
+Date = format(Sys.Date()-1,c("%Y","%-m","%-d"))
 
 DataA = read.table(paste("raw/airdata_",Date[1],"-",Date[2],"-",Date[3],".dat",sep=""),head=T)
 DataSC = read.table(paste("raw/soildata-c_",Date[1],"-",Date[2],"-",Date[3],".dat",sep=""),head=T)
