@@ -1,0 +1,2 @@
+smbclient //rasppinas.local/public -U " "%" "
+
