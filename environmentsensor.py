@@ -3,10 +3,14 @@ import time
 import argparse
 import board
 import busio
+import digitalio
 import adafruit_bme280
+import adafruit_tsl2591
 
-def get_i2c_data(bme):
-	return "{:.2f}\t{:.1f}\t{:.2f}\t{:.1f}\t{:.2f}".format(bme.humidity,bme.temperature,bme.pressure,bme.altitude,bme.sea_level_pressure)
+def get_bme_data(bme):
+	return "{:.2f}\t{:.2f}\t{:.2f}\t{:.1f}\t{:.2f}".format(bme.humidity,bme.temperature,bme.pressure,bme.altitude,bme.sea_level_pressure)
+def get_tsl_data(tsl):
+	return "{:.2f}\t{}\t{}".format(tsl.lux,tsl.visible,tsl.infrared)
 def dayseconds():
 	Now = time.localtime()
 	return Now.tm_hour*60*60 + Now.tm_min*60 + Now.tm_sec
@@ -21,12 +25,14 @@ Args = Parser.parse_args()
 
 
 
+spi = busio.SPI(board.SCK, MOSI=board.MOSI, MISO=board.MISO)
 i2c = busio.I2C(board.SCL, board.SDA)
-bme280 = adafruit_bme280.Adafruit_BME280_I2C(i2c)
-#bme280.sea_level_pressure = 1019.75
+cs = digitalio.DigitalInOut(board.D5)
+bme280 = adafruit_bme280.Adafruit_BME280_SPI(spi, cs)
+tsl2591 = adafruit_tsl2591.TSL2591(i2c)
 
-Head = "DailySecond\tHumidity\tTemperature\tPressure\tAltitude\tSeaLevelPressure"
-Units = "#[s]\t[%]\t[°C]\t[hPa]\t[m]"
+Head = "DailySecond\tHumidity\tTemperature\tPressure\tAltitude\tSeaLevelPressure\tLux\tVisibleLight\tInfraredLevel"
+Units = "#[s]\t[%]\t[°C]\t[hPa]\t[m]\t[m]\t[lx]\t[]\t[]"
 Prefix = ""
 Time = 0
 TimeLast = 0
@@ -48,11 +54,13 @@ print(Units)
 
 Time = dayseconds()
 while TimeLast <= Time:
-	Data = repr(Time) + "\t" + get_i2c_data(bme280)
+	Start = time.time()
+	Data = repr(Time) + "\t" + get_bme_data(bme280) + "\t" + get_tsl_data(tsl2591)
 	File.write("{}\n".format(Data))
 	print(Data)
+	Stop = time.time()
 	#print and write everything; AFTERWARDS reset; sothat nothing interrupts the tally function call at loop start
-	time.sleep(0.7)
+	time.sleep(1-(Stop-Start))
 	TimeLast = Time
 	Time = dayseconds()
 
